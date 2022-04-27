@@ -5,7 +5,7 @@ const books = require('./books');
 const {
   validationInput,
   validationReadPage,
-} = require('./error-handling');
+} = require('./api/books/error-handling');
 
 const checkId = () => {
   const id = nanoid(16);
@@ -181,17 +181,7 @@ const getBookByIdHandler = (request, h) => {
       data: {
         book: {
           id: book.bookId,
-          name: book.name,
-          year: book.year,
-          author: book.author,
-          summary: book.summary,
-          publisher: book.publisher,
-          pageCount: book.pageCount,
-          readPage: book.readPage,
-          finished: book.finished,
-          reading: book.reading,
-          insertedAt: book.insertedAt,
-          updatedAt: book.insertedAt,
+          ...book,
         },
       },
     }).code(200);
