@@ -18,7 +18,7 @@ class BookHandler {
     this.deleteBookByIdHandler = this.deleteBookByIdHandler.bind(this);
   }
 
-  postBookHandler(request, h) {
+  async postBookHandler(request, h) {
     try {
       this.validator.validateBookPayload(request.payload);
       const {
@@ -60,7 +60,7 @@ class BookHandler {
       //   throw new Error(`${validationResult.error.message}`);
       // }
 
-      const book = this.service.addBook({
+      const book = await this.service.addBook({
         name,
         year,
         author,
@@ -92,41 +92,41 @@ class BookHandler {
     }
   }
 
-  getAllBooksHandler(request, h) {
+  async getAllBooksHandler(request, h) {
     try {
-      const { name } = request.query;
-      const { reading } = request.query;
-      const { finished } = request.query;
+      // const { name } = request.query;
+      // const { reading } = request.query;
+      // const { finished } = request.query;
 
       let message = '';
-      let status = '';
+      // const status = '';
       let books = null;
 
-      if (name !== undefined) {
-        books = this.service.getBooks(name, 1);
-        message = `Berhasil menampilkan buku ${name}`;
-      } else if (reading !== undefined) {
-        if (reading) {
-          status = 'Reading';
-        } else {
-          status = 'Not Reading';
-        }
+      // if (name !== undefined) {
+      //   books = this.service.getBooks(name, 1);
+      //   message = `Berhasil menampilkan buku ${name}`;
+      // } else if (reading !== undefined) {
+      //   if (reading) {
+      //     status = 'Reading';
+      //   } else {
+      //     status = 'Not Reading';
+      //   }
 
-        books = this.service.getBooks(reading, 2);
-        message = `Berhasil menampilkan buku ${status}`;
-      } else if (finished !== undefined) {
-        if (finished) {
-          status = 'finished';
-        } else {
-          status = 'Not finished';
-        }
+      //   books = this.service.getBooks(reading, 2);
+      //   message = `Berhasil menampilkan buku ${status}`;
+      // } else if (finished !== undefined) {
+      //   if (finished) {
+      //     status = 'finished';
+      //   } else {
+      //     status = 'Not finished';
+      //   }
 
-        books = this.service.getBooks(finished, 3);
-        message = `Berhasil menampilkan buku ${status}`;
-      } else {
-        books = this.service.getBooks();
-        message = 'Berhasil menampilkan semua buku';
-      }
+      //   books = this.service.getBooks(finished, 3);
+      //   message = `Berhasil menampilkan buku ${status}`;
+      // } else {
+      books = await this.service.getBooks();
+      message = 'Berhasil menampilkan semua buku';
+      // }
 
       return {
         status: 'success',
@@ -141,10 +141,10 @@ class BookHandler {
     }
   }
 
-  getBookByIdHandler(request, h) {
+  async getBookByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      const book = this.service.getBookById(id);
+      const book = await this.service.getBookById(id);
       return {
         status: 'success',
         message: 'Buku ditemukan',
@@ -166,7 +166,7 @@ class BookHandler {
     }
   }
 
-  putBookByIdHandler(request, h) {
+  async putBookByIdHandler(request, h) {
     try {
       this.validator.validateBookPayload(request.payload);
       const { id } = request.params;
@@ -195,16 +195,19 @@ class BookHandler {
       // eslint-disable-next-line max-len
       // validationReadPage('Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount', pageCount, readPage);
 
-      const book = this.service.editBookById(id, {
-        name,
-        year,
-        author,
-        summary,
-        publisher,
-        pageCount,
-        readPage,
-        reading,
-      });
+      const book = await this.service.editBookById(
+        id,
+        {
+          name,
+          year,
+          author,
+          summary,
+          publisher,
+          pageCount,
+          readPage,
+          reading,
+        },
+      );
 
       return {
         status: 'success',
@@ -233,10 +236,10 @@ class BookHandler {
     }
   }
 
-  deleteBookByIdHandler(request, h) {
+  async deleteBookByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      this.service.deleteBookById(id);
+      await this.service.deleteBookById(id);
 
       return {
         status: 'success',
