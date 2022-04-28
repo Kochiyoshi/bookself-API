@@ -1,5 +1,7 @@
 /* eslint-disable eqeqeq */
 const { nanoid } = require('nanoid');
+const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class BooksService {
   constructor() {
@@ -42,6 +44,11 @@ class BooksService {
       insertedAt: now,
       updatedAt: now,
     });
+
+    if (this.book.findIndex((book) => book.id === id) === -1) {
+      // eslint-disable-next-line no-console
+      throw new InvariantError('Buku gagal ditambahkan');
+    }
 
     return id;
   }
@@ -96,7 +103,7 @@ class BooksService {
   getBookById(id) {
     const bookTemp = this.book.find((book) => book.id === id);
     if (!bookTemp) {
-      throw new Error('Buku tidak ditemukan');
+      throw new NotFoundError('Buku tidak ditemukan');
     }
     return {
       book: bookTemp,
@@ -118,7 +125,7 @@ class BooksService {
     const bookIndex = this.book.findIndex((book) => book.id === id);
 
     if (bookIndex === -1) {
-      throw new Error('Gagal memperbarui buku. Id tidak ditemukan');
+      throw new NotFoundError('Gagal memperbarui buku. Id tidak ditemukan');
     }
 
     this.book[bookIndex] = {
@@ -142,9 +149,8 @@ class BooksService {
     const bookIndex = this.book.findIndex((book) => book.id === id);
 
     if (bookIndex === -1) {
-      throw new Error('Buku gagal dihapus. Id tidak ditemukan');
+      throw new NotFoundError('Buku gagal dihapus. Id tidak ditemukan');
     }
-
     this.book.splice(bookIndex, 1);
   }
 }

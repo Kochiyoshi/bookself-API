@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 const Hapi = require('@hapi/hapi');
-const routes = require('./routes');
+// const routes = require('./routes');
 const books = require('./api/books');
 const BooksService = require('./services/inMemory/BooksService');
+const BookValidator = require('./validator/books');
 // const bookPlugin = require('./bookPlugin'); //simple plugin example
 
 const init = async () => {
@@ -24,9 +25,11 @@ const init = async () => {
     plugin: books,
     options: {
       service: booksService,
+      validator: BookValidator,
     },
   });
 
+  // eslint-disable-next-line function-paren-newline
   await server.start(
     // simple plugin example
     // {

@@ -1,12 +1,15 @@
-const {
-  ValidationError,
-  validationInput,
-  validationReadPage,
-} = require('./error-handling');
+// const {
+//   ValidationError,
+//   validationInput,
+//   validate,
+//   validationReadPage,
+// } = require('./error-handling');
+const ClientError = require('../../exceptions/ClientError');
 
 class BookHandler {
-  constructor(service) {
+  constructor(service, validator) {
     this.service = service;
+    this.validator = validator;
 
     this.postBookHandler = this.postBookHandler.bind(this);
     this.getAllBooksHandler = this.getAllBooksHandler.bind(this);
@@ -17,6 +20,7 @@ class BookHandler {
 
   postBookHandler(request, h) {
     try {
+      this.validator.validateBookPayload(request.payload);
       const {
         name,
         year,
@@ -28,18 +32,33 @@ class BookHandler {
         reading,
       } = request.payload;
 
-      validationInput(
-        'Gagal menambahkan buku. Mohon isi',
-        name,
-        year,
-        author,
-        summary,
-        publisher,
-        pageCount,
-        readPage,
-        reading,
-      );
-      validationReadPage('Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount', pageCount, readPage);
+      // validationInput(
+      //   'Gagal menambahkan buku. Mohon isi',
+      //   name,
+      //   year,
+      //   author,
+      //   summary,
+      //   publisher,
+      //   pageCount,
+      //   readPage,
+      //   reading,
+      // );
+      // eslint-disable-next-line max-len
+      // validationReadPage('Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount', pageCount, readPage);
+      // const validationResult = validate({
+      //   name,
+      //   year,
+      //   author,
+      //   summary,
+      //   publisher,
+      //   pageCount,
+      //   readPage,
+      //   reading,
+      // });
+
+      // if (validationResult.error) {
+      //   throw new Error(`${validationResult.error.message}`);
+      // }
 
       const book = this.service.addBook({
         name,
@@ -60,15 +79,15 @@ class BookHandler {
         },
       }).code(201);
     } catch (error) {
-      if (error instanceof ValidationError) {
+      if (error instanceof ClientError) {
         return h.response({
           status: 'fail',
           message: error.message,
-        }).code(400);
+        }).code(error.statusCode);
       }
       return h.response({
         status: 'fail',
-        message: error.message,
+        message: `test${error.message}`,
       }).code(500);
     }
   }
@@ -134,15 +153,22 @@ class BookHandler {
         },
       };
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
       return h.response({
         status: 'fail',
         message: error.message,
-      }).code(404);
+      }).code(500);
     }
   }
 
   putBookByIdHandler(request, h) {
     try {
+      this.validator.validateBookPayload(request.payload);
       const { id } = request.params;
       const {
         name,
@@ -155,18 +181,19 @@ class BookHandler {
         reading,
       } = request.payload;
 
-      validationInput(
-        'Gagal memperbarui buku. Mohon isi',
-        name,
-        year,
-        author,
-        summary,
-        publisher,
-        pageCount,
-        readPage,
-        reading,
-      );
-      validationReadPage('Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount', pageCount, readPage);
+      // validationInput(
+      //   'Gagal memperbarui buku. Mohon isi',
+      //   name,
+      //   year,
+      //   author,
+      //   summary,
+      //   publisher,
+      //   pageCount,
+      //   readPage,
+      //   reading,
+      // );
+      // eslint-disable-next-line max-len
+      // validationReadPage('Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount', pageCount, readPage);
 
       const book = this.service.editBookById(id, {
         name,
@@ -187,22 +214,22 @@ class BookHandler {
         },
       };
     } catch (error) {
-      if (error instanceof ValidationError) {
+      // if (error instanceof ValidationError) {
+      //   return h.response({
+      //     status: 'fail',
+      //     message: error.message,
+      //   }).code(400);
+      // }
+      if (error instanceof ClientError) {
         return h.response({
           status: 'fail',
           message: error.message,
-        }).code(400);
-      }
-      if (error instanceof SyntaxError) {
-        return h.response({
-          status: 'fail',
-          message: error.message,
-        }).code(500);
+        }).code(error.statusCode);
       }
       return h.response({
         status: 'fail',
         message: error.message,
-      }).code(404);
+      }).code(500);
     }
   }
 
@@ -216,10 +243,16 @@ class BookHandler {
         message: 'Buku berhasil dihapus',
       };
     } catch (error) {
+      if (error instanceof ClientError) {
+        return h.response({
+          status: 'fail',
+          message: error.message,
+        }).code(error.statusCode);
+      }
       return h.response({
         status: 'fail',
         message: error.message,
-      }).code(404);
+      }).code(500);
     }
   }
 }
